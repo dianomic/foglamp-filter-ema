@@ -25,8 +25,7 @@ __copyright__ = "Copyright (c) 2019 Dianomic Systems"
 __license__ = "Apache 2.0"
 __version__ = "${VERSION}"
 
-
-_LOGGER = logger.setup(__name__, level = logging.DEBUG)
+_LOGGER = logger.setup(__name__, level = logging.WARN)
 
 # Filter specific objects
 the_callback = None
