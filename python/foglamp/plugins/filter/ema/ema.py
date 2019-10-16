@@ -132,7 +132,7 @@ def plugin_reconfigure(handle, new_config):
     """
     global rate, datapoint
     rate = float(new_config['rate']['value'])
-    datapoint = config['datapoint']['value']
+    datapoint = new_config['datapoint']['value']
     _LOGGER.debug("Old config for ema plugin {} \n new config {}".format(handle, new_config))
     new_handle = copy.deepcopy(new_config)
 
