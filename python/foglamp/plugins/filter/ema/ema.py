@@ -60,7 +60,7 @@ _DEFAULT_CONFIG = {
         'order': "2"
     },
     'datapoint': {
-        'description': 'Datapointn name for calulated ema value',
+        'description': 'Datapoint name for calulated ema value',
         'type': 'string',
         'default': 'ema',
         'displayName': 'EMA datapoint',
