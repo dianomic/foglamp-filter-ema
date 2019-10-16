@@ -12,7 +12,7 @@ and (100-x)% of history
 A datapoint called 'ema' is added to each reading being filtered
 """
 
-
+import time
 import copy
 import logging
 
@@ -149,6 +149,9 @@ def plugin_shutdown(handle):
     """
     global shutdown_in_progress, the_callback, the_ingest_ref, rate, latest
     shutdown_in_progress = True
+    # Allow some time to ingest to complete
+    time.sleep(1)
+    # Remove objects
     the_callback = None
     the_ingest_ref = None
     rate = None
