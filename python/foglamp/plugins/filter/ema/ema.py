@@ -37,6 +37,8 @@ latest = None
 rate = None
 # datapoint name
 datapoint = None
+# plugin shutdown indicator
+shutdown_in_progress = False
 
 _DEFAULT_CONFIG = {
     'plugin': {
@@ -69,6 +71,12 @@ _DEFAULT_CONFIG = {
 }
 
 def compute_ema(reading):
+    """
+    Compute EMA
+
+    Args:
+        A reading data
+    """
     global rate, latest
     for attribute in list(reading):
         if not latest:
@@ -139,7 +147,8 @@ def plugin_shutdown(handle):
     Returns:
         plugin shutdown
     """
-    global the_callback, the_ingest_ref, rate, latest
+    global shutdown_in_progress, the_callback, the_ingest_ref, rate, latest
+    shutdown_in_progress = True
     the_callback = None
     the_ingest_ref = None
     rate = None
@@ -148,7 +157,15 @@ def plugin_shutdown(handle):
     _LOGGER.info('filter ema plugin shutdown.')
 
 def plugin_ingest(handle, data):
-    global the_callback, the_ingest_ref
+    """ Modify readings data and pass it onward
+
+    Args:
+        handle: handle returned by the plugin initialisation call
+    """
+    global shutdown_in_progress, the_callback, the_ingest_ref
+    if shutdown_in_progress == True:
+        return
+
     if handle['enable']['value'] == 'false':
         # Filter not enabled, just pass data onwards
         filter_ingest.filter_ingest_callback(the_callback,
