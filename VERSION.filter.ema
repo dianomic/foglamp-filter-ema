@@ -1,1 +1,2 @@
-foglamp_version>1.7
+foglamp_filter_ema_version=1.7.1
+foglamp_version>=1.7
