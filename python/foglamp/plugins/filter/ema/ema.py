@@ -17,7 +17,6 @@ import copy
 import logging
 
 from foglamp.common import logger
-from foglamp.plugins.common import utils
 import filter_ingest
 
 __author__ = "Massimiliano Pinto"
@@ -51,8 +50,8 @@ _DEFAULT_CONFIG = {
         'description': 'Enable ema plugin',
         'type': 'boolean',
         'default': 'false',
-        'displayName': 'Enable',
-        'order': "1"
+        'displayName': 'Enabled',
+        'order': "3"
     },
     'rate': {
         'description': 'Rate value: include % of current value',
@@ -62,17 +61,17 @@ _DEFAULT_CONFIG = {
         'order': "2"
     },
     'datapoint': {
-        'description': 'Datapoint name for calulated ema value',
+        'description': 'Datapoint name for calculated ema value',
         'type': 'string',
         'default': 'ema',
         'displayName': 'EMA datapoint',
-        'order': "3"
+        'order': "1"
     }
 }
 
+
 def compute_ema(reading):
-    """
-    Compute EMA
+    """ Compute EMA
 
     Args:
         A reading data
@@ -84,8 +83,9 @@ def compute_ema(reading):
         latest = reading[attribute] * rate + latest * (1 - rate)
         reading[datapoint] = latest
 
+
 def plugin_info():
-    """ Returns information about the plugin.
+    """ Returns information about the plugin
     Args:
     Returns:
         dict: plugin information
@@ -94,16 +94,19 @@ def plugin_info():
     return {
         'name': 'ema',
         'version': '1.7.0',
-        'mode' : "none",
+        'mode': "none",
         'type': 'filter',
         'interface': '1.0',
         'config': _DEFAULT_CONFIG
     }
 
-def plugin_init(config, ingest_ref, callback):    
-    """ Initialise the plugin.
+
+def plugin_init(config, ingest_ref, callback):
+    """ Initialise the plugin
     Args:
-        config: JSON configuration document for the South plugin configuration category
+        config: JSON configuration document for the Filter plugin configuration category
+        ingest_ref:
+        callback:
     Returns:
         data: JSON object to be used in future calls to the plugin
     Raises:
@@ -120,6 +123,7 @@ def plugin_init(config, ingest_ref, callback):
     _LOGGER.debug("plugin_init for filter EMA called")
 
     return data
+
 
 def plugin_reconfigure(handle, new_config):
     """ Reconfigures the plugin
@@ -158,21 +162,21 @@ def plugin_shutdown(handle):
 
     _LOGGER.info('filter ema plugin shutdown.')
 
+
 def plugin_ingest(handle, data):
     """ Modify readings data and pass it onward
 
     Args:
         handle: handle returned by the plugin initialisation call
+        data: readings data
     """
     global shutdown_in_progress, the_callback, the_ingest_ref
-    if shutdown_in_progress == True:
+    if shutdown_in_progress:
         return
 
     if handle['enable']['value'] == 'false':
         # Filter not enabled, just pass data onwards
-        filter_ingest.filter_ingest_callback(the_callback,
-                                             the_ingest_ref,
-                                             data)
+        filter_ingest.filter_ingest_callback(the_callback, the_ingest_ref, data)
         return
 
     # Filter is enabled: compute EMA for each reading
@@ -180,8 +184,6 @@ def plugin_ingest(handle, data):
         compute_ema(elem['readings'])
 
     # Pass data onwards
-    filter_ingest.filter_ingest_callback(the_callback,
-                                         the_ingest_ref,
-                                         data)
+    filter_ingest.filter_ingest_callback(the_callback, the_ingest_ref, data)
 
     _LOGGER.debug("ema filter_ingest done")
