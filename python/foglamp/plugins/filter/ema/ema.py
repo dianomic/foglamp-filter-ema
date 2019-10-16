@@ -77,7 +77,7 @@ def compute_ema(reading):
     Args:
         A reading data
     """
-    global rate, latest
+    global rate, latest, datapoint
     for attribute in list(reading):
         if not latest:
             latest = reading[attribute]
@@ -132,7 +132,7 @@ def plugin_reconfigure(handle, new_config):
     """
     global rate, datapoint
     rate = float(new_config['rate']['value'])
-    datapoint = config['datapoint']['value']
+    datapoint = new_config['datapoint']['value']
     _LOGGER.debug("Old config for ema plugin {} \n new config {}".format(handle, new_config))
     new_handle = copy.deepcopy(new_config)
 
@@ -147,15 +147,14 @@ def plugin_shutdown(handle):
     Returns:
         plugin shutdown
     """
-    global shutdown_in_progress, the_callback, the_ingest_ref, rate, latest
+    global shutdown_in_progress, the_callback, the_ingest_ref, rate, latest, datapoint
     shutdown_in_progress = True
-    # Allow some time to ingest to complete
     time.sleep(1)
-    # Remove objects
     the_callback = None
     the_ingest_ref = None
     rate = None
     latest = None
+    datapoint = None
 
     _LOGGER.info('filter ema plugin shutdown.')
 
