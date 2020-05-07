@@ -95,7 +95,7 @@ Python filters are added in the same way as any other filters.
 | |ema_1| |
 +---------+
 
-  - Configure your statistics filter
+  - Configure your ema filter
 
     - **EMA datapoint**: The name of the data point to create within the asset
 
