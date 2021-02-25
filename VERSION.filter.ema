@@ -1,2 +1,2 @@
-foglamp_filter_ema_version=1.8.2
-foglamp_version>=1.8
+foglamp_filter_ema_version=1.9.0
+foglamp_version>=1.9
