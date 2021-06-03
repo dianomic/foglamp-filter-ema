@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # FOGLAMP_BEGIN
-# See: http://foglamp.readthedocs.io/
+# See: https://foglamp-foglamp-documentation.readthedocs-hosted.com
 # FOGLAMP_END
 
 """ Module for EMA filter plugin
@@ -93,7 +93,7 @@ def plugin_info():
     """
     return {
         'name': 'ema',
-        'version': '1.9.0',
+        'version': '1.9.1',
         'mode': "none",
         'type': 'filter',
         'interface': '1.0',
