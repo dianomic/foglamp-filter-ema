@@ -20,24 +20,11 @@ from foglamp.common import logger
 import filter_ingest
 
 __author__ = "Massimiliano Pinto"
-__copyright__ = "Copyright (c) 2019 Dianomic Systems"
+__copyright__ = "Copyright (c) 2022 Dianomic Systems"
 __license__ = "Apache 2.0"
 __version__ = "${VERSION}"
 
 _LOGGER = logger.setup(__name__, level = logging.WARN)
-
-# Filter specific objects
-the_callback = None
-the_ingest_ref = None
-
-# latest ema value
-latest = None
-# rate value
-rate = None
-# datapoint name
-datapoint = None
-# plugin shutdown indicator
-shutdown_in_progress = False
 
 _DEFAULT_CONFIG = {
     'plugin': {
@@ -70,18 +57,17 @@ _DEFAULT_CONFIG = {
 }
 
 
-def compute_ema(reading):
+def compute_ema(handle, reading):
     """ Compute EMA
 
     Args:
         A reading data
     """
-    global rate, latest, datapoint
     for attribute in list(reading):
-        if not latest:
-            latest = reading[attribute]
-        latest = reading[attribute] * rate + latest * (1 - rate)
-        reading[datapoint] = latest
+        if not handle['latest']:
+            handle['latest'] = reading[attribute]
+        handle['latest'] = reading[attribute] * handle['rate'] + handle['latest'] * (1 - handle['rate'])
+        reading[handle['datapoint']] = handle['latest']
 
 
 def plugin_info():
@@ -111,18 +97,19 @@ def plugin_init(config, ingest_ref, callback):
         data: JSON object to be used in future calls to the plugin
     Raises:
     """
-    data = copy.deepcopy(config)
+    _config = copy.deepcopy(config)
 
-    global the_callback, the_ingest_ref, rate, datapoint
+    _config['ingest_ref'] = ingest_ref
+    _config['callback'] = callback
+    _config['latest'] = None
 
-    the_callback = callback
-    the_ingest_ref = ingest_ref
-    rate = float(config['rate']['value'])
-    datapoint = config['datapoint']['value']
+    _config['rate'] = float(config['rate']['value'])
+    _config['datapoint'] = config['datapoint']['value']
+    _config['shutdown_in_progress'] = False
 
     _LOGGER.debug("plugin_init for filter EMA called")
 
-    return data
+    return _config
 
 
 def plugin_reconfigure(handle, new_config):
@@ -134,11 +121,17 @@ def plugin_reconfigure(handle, new_config):
     Returns:
         new_handle: new handle to be used in the future calls
     """
-    global rate, datapoint
-    rate = float(new_config['rate']['value'])
-    datapoint = new_config['datapoint']['value']
+    handle['rate'] = float(new_config['rate']['value'])
+    handle['datapoint'] = new_config['datapoint']['value']
     _LOGGER.debug("Old config for ema plugin {} \n new config {}".format(handle, new_config))
+
     new_handle = copy.deepcopy(new_config)
+    new_handle['rate'] = float(config['rate']['value'])
+    new_handle['datapoint'] = config['datapoint']['value']
+    new_handle['shutdown_in_progress'] = False
+    new_handle['latest'] = None
+    new_handle['ingest_ref'] = ingest_ref
+    new_handle['callback'] = callback
 
     return new_handle
 
@@ -151,14 +144,11 @@ def plugin_shutdown(handle):
     Returns:
         plugin shutdown
     """
-    global shutdown_in_progress, the_callback, the_ingest_ref, rate, latest, datapoint
-    shutdown_in_progress = True
+    handle['shutdown_in_progress'] = True
     time.sleep(1)
-    the_callback = None
-    the_ingest_ref = None
-    rate = None
-    latest = None
-    datapoint = None
+    handle['callback'] = None
+    handle['ingest_ref'] = None
+    handle['latest'] = None
 
     _LOGGER.info('filter ema plugin shutdown.')
 
@@ -170,20 +160,23 @@ def plugin_ingest(handle, data):
         handle: handle returned by the plugin initialisation call
         data: readings data
     """
-    global shutdown_in_progress, the_callback, the_ingest_ref
-    if shutdown_in_progress:
+    if handle['shutdown_in_progress']:
         return
 
     if handle['enable']['value'] == 'false':
         # Filter not enabled, just pass data onwards
-        filter_ingest.filter_ingest_callback(the_callback, the_ingest_ref, data)
+        filter_ingest.filter_ingest_callback(handle['callback'],
+                                             handle['ingest_ref'],
+                                             data)
         return
 
     # Filter is enabled: compute EMA for each reading
     for elem in data:
-        compute_ema(elem['readings'])
+        compute_ema(handle, elem['readings'])
 
     # Pass data onwards
-    filter_ingest.filter_ingest_callback(the_callback, the_ingest_ref, data)
+    filter_ingest.filter_ingest_callback(handle['callback'],
+                                         handle['ingest_ref'],
+                                         data)
 
     _LOGGER.debug("ema filter_ingest done")
