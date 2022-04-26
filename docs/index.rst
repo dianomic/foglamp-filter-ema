@@ -20,7 +20,7 @@ The plugin_info entry point that returns details of the plugin and the default c
         return {
             'name': 'ema',
             'version': '1.9.2',
-            'mode': "none",
+            'mode': 'none',
             'type': 'filter',
             'interface': '1.0',
             'config': _DEFAULT_CONFIG
@@ -34,8 +34,8 @@ The plugin_init entry point that initialises the plugin
         """ Initialise the plugin
         Args:
             config: JSON configuration document for the Filter plugin configuration category
-            ingest_ref:
-            callback:
+            ingest_ref: filter ingest reference
+            callback:   filter callback
         Returns:
             data: JSON object to be used in future calls to the plugin
 
@@ -54,7 +54,6 @@ The plugin_reconfigure entry point that us called whenever the configuration is 
         Returns:
             new_handle: new handle to be used in the future calls
         """
-        global rate, datapoint
         ...
         return new_handle
 
