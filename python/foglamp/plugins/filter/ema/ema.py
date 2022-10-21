@@ -81,9 +81,9 @@ def plugin_info():
     Raises:
     """
     return {
-        'name': PLUGIN_NAME,
-        'version': '1.9.2',
-        'mode': 'none',
+        'name': 'ema',
+        'version': '2.0.0',
+        'mode': "none",
         'type': 'filter',
         'interface': '1.0',
         'config': _DEFAULT_CONFIG
