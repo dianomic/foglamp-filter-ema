@@ -19,7 +19,7 @@ The plugin_info entry point that returns details of the plugin and the default c
         """
         return {
             'name': 'ema',
-            'version': '2.0.0',
+            'version': '2.0.1',
             'mode': "none",
             'type': 'filter',
             'interface': '1.0',
