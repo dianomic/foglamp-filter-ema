@@ -93,7 +93,7 @@ def plugin_info():
     """
     return {
         'name': 'ema',
-        'version': '2.2.0',
+        'version': '2.3.0',
         'mode': "none",
         'type': 'filter',
         'interface': '1.0',
